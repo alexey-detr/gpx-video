@@ -50,11 +50,13 @@ function parseGpx(filePath: string): GPXPoint[] {
 
   const trkpts = parsed.gpx.trk.trkseg.trkpt;
 
-  return trkpts.map((trkpt: any) => {
+  const result = trkpts.map((trkpt: any) => {
     const lat = parseFloat(trkpt["@_lat"]);
     const lon = parseFloat(trkpt["@_lon"]);
     return [lon, lat];
   });
+
+  return smoothPath(result, 0.0001);
 }
 
 /**
@@ -85,11 +87,16 @@ function createSvgAnimation(
   const avgLat = (minLat + maxLat) / 2;
   const lonKmPerDegree = 111 * Math.cos((avgLat * Math.PI) / 180);
 
-  const lonRangeKm = (maxLon - minLon) * lonKmPerDegree;
-  const latRangeKm = (maxLat - minLat) * latKmPerDegree;
+  // Calculate the area of the bounding box in square kilometers
+  const widthKm = (maxLon - minLon) * lonKmPerDegree;
+  const heightKm = (maxLat - minLat) * latKmPerDegree;
+  const areaKm2 = widthKm * heightKm;
+
+  // Determine stroke width based on area
+  const strokeWidth = Math.max(0.1, Math.min(5, 100 / Math.sqrt(areaKm2)));
 
   // Maintain real-world aspect ratio
-  const aspectRatio = lonRangeKm / latRangeKm;
+  const aspectRatio = widthKm / heightKm;
   let width = 3840; // Base width
   let height = aspectRatio > 1 ? Math.floor(width / aspectRatio) : 800;
   if (aspectRatio <= 1) width = Math.floor(height * aspectRatio);
@@ -119,7 +126,7 @@ function createSvgAnimation(
     `M ${scaledPoints[0][0]} ${scaledPoints[0][1]}`,
     ...scaledPoints.slice(1).map((p) => `L ${p[0]} ${p[1]}`),
   ].join(" ");
-  svgContent += `<path d="${pathData}" fill="none" stroke="red" stroke-width="20" stroke-linecap="round">\n`;
+  svgContent += `<path d="${pathData}" fill="none" stroke="red" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">\n`;
 
   // Calculate real path length
   const realPathLength = calculatePathLength(scaledPoints);
