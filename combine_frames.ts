@@ -6,7 +6,7 @@ const execPromise = promisify(exec);
 export const combineFrames = async (outputFile: string) => {
   const frameDir = "./frames";
   const framePattern = `${frameDir}/frame-%04d.png`;
-  const command = `ffmpeg -framerate 60 -i ${framePattern} -c:v libx264 -pix_fmt yuv420p ${outputFile}`;
+  const command = `ffmpeg -y -framerate 60 -i ${framePattern} -c:v libx264 -b:v 20M -pix_fmt yuv420p ${outputFile}`;
 
   try {
     const { stdout, stderr } = await execPromise(command);

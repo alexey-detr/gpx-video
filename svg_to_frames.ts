@@ -3,7 +3,6 @@ import fs from "node:fs/promises";
 
 export const renderSvgAnimation = async (svgFile: string, duration: number) => {
   const outputDir = "./frames"; // Directory to save frames
-  const svgFilePath = `file://${import.meta.dirname}/${svgFile}`; // Path to your SVG animation file
   const frameCount = 60 * duration; // Number of frames to render
   const fps = 60;
   const width = 3840;
@@ -20,26 +19,12 @@ export const renderSvgAnimation = async (svgFile: string, duration: number) => {
   await page.setViewport({ width, height });
 
   // Load the SVG animation
-  await page.goto(svgFilePath);
+  await page.goto("http://localhost:3000");
 
+  // Pause the animation initially
   await page.evaluate(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      body, svg {
-        margin: 0;
-        background-color: black; /* Set background to black */
-        width: 100%;
-        height: 100%;
-      }
-      svg {
-        display: block; /* Remove extra margins or padding */
-      }
-    `;
-    if (document.head) {
-      document.head.appendChild(style); // Append to <head> if available
-    } else if (document.documentElement) {
-      document.documentElement.appendChild(style); // Append to root if no <head>
-    }
+    const svgElement = document.querySelector("svg");
+    svgElement?.pauseAnimations();
   });
 
   // Render each frame

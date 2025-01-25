@@ -59,13 +59,20 @@ function parseGpx(filePath: string): GPXPoint[] {
   return smoothPath(result, 0.0001);
 }
 
+const easingInjection = `
+      keyTimes="0;1" 
+      keySplines="0.42 0 0.58 1" 
+      calcMode="spline"
+`;
+
 /**
  * Create an SVG animation from a list of points.
  */
 function createSvgAnimation(
   points: GPXPoint[],
   outputFile: string,
-  duration: number
+  duration: number,
+  easing = false
 ): void {
   // Define canvas size and scale
   const lons = points.map((p) => p[0]);
@@ -91,9 +98,6 @@ function createSvgAnimation(
   const widthKm = (maxLon - minLon) * lonKmPerDegree;
   const heightKm = (maxLat - minLat) * latKmPerDegree;
   const areaKm2 = widthKm * heightKm;
-
-  // Determine stroke width based on area
-  const strokeWidth = Math.max(0.1, Math.min(5, 100 / Math.sqrt(areaKm2)));
 
   // Maintain real-world aspect ratio
   const aspectRatio = widthKm / heightKm;
@@ -126,19 +130,19 @@ function createSvgAnimation(
     `M ${scaledPoints[0][0]} ${scaledPoints[0][1]}`,
     ...scaledPoints.slice(1).map((p) => `L ${p[0]} ${p[1]}`),
   ].join(" ");
-  svgContent += `<path d="${pathData}" fill="none" stroke="red" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">\n`;
+  svgContent += `<path d="${pathData}" fill="none" stroke="red" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">\n`;
 
   // Calculate real path length
   const realPathLength = calculatePathLength(scaledPoints);
 
-  // Add animation
+  // Add animation with easing
   svgContent += `
     <animate 
       attributeName="stroke-dasharray" 
       from="0 ${realPathLength}" 
       to="${realPathLength} ${realPathLength}" 
       dur="${duration}s" 
-      repeatCount="indefinite" />
+      repeatCount="indefinite" ${easing ? easingInjection : ""} />
   `;
   svgContent += `</path>\n`;
 
@@ -149,8 +153,13 @@ function createSvgAnimation(
   console.log(`SVG animation saved to ${outputFile}`);
 }
 
-export function gpxToSvg(gpxFile: string, svgFile: string, duration: number) {
+export function gpxToSvg(
+  gpxFile: string,
+  svgFile: string,
+  duration: number,
+  easing = false
+) {
   // Parse GPX and create animation
   const gpxPoints = parseGpx(gpxFile);
-  createSvgAnimation(gpxPoints, svgFile, duration);
+  createSvgAnimation(gpxPoints, svgFile, duration, easing);
 }
