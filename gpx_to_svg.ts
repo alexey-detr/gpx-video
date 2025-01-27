@@ -1,5 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
-import fs from "fs";
+import fs, { writeFileSync } from "fs";
 
 // Define types for GPX points
 type GPXPoint = [number, number]; // [longitude, latitude]
@@ -82,6 +82,10 @@ function createSvgAnimation(
   const minLat = Math.min(...lats);
   const maxLat = Math.max(...lats);
 
+  // Calculate the center of the route
+  const centerLat = (minLat + maxLat) / 2;
+  const centerLon = (minLon + maxLon) / 2;
+
   // Convert latitude to Mercator projection
   const mercatorProjection = (lat: number): number =>
     Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
@@ -121,27 +125,25 @@ function createSvgAnimation(
   const scaledPoints = points.map(scalePoint);
 
   // Build SVG content as a string
-  let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="-20 -20 ${
-    width + 40
-  } ${height + 40}">\n`;
+  let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">\n`;
 
   // Path data
   const pathData = [
     `M ${scaledPoints[0][0]} ${scaledPoints[0][1]}`,
     ...scaledPoints.slice(1).map((p) => `L ${p[0]} ${p[1]}`),
   ].join(" ");
-  svgContent += `<path d="${pathData}" fill="none" stroke="red" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">\n`;
+  svgContent += `<path d="${pathData}" fill="none" stroke="red" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">\n`;
 
   // Calculate real path length
   const realPathLength = calculatePathLength(scaledPoints);
 
   // Add animation with easing
   svgContent += `
-    <animate 
-      attributeName="stroke-dasharray" 
-      from="0 ${realPathLength}" 
-      to="${realPathLength} ${realPathLength}" 
-      dur="${duration}s" 
+    <animate
+      attributeName="stroke-dasharray"
+      from="0 ${realPathLength}"
+      to="${realPathLength} ${realPathLength}"
+      dur="${duration}s"
       repeatCount="indefinite" ${easing ? easingInjection : ""} />
   `;
   svgContent += `</path>\n`;
@@ -151,6 +153,22 @@ function createSvgAnimation(
   // Save SVG
   fs.writeFileSync(outputFile, svgContent);
   console.log(`SVG animation saved to ${outputFile}`);
+
+  // Generate metadata JSON
+  const metadata = {
+    minLat,
+    maxLat,
+    minLon,
+    maxLon,
+    center: {
+      lat: centerLat,
+      lon: centerLon,
+    },
+  };
+
+  // Write metadata to JSON file
+  const jsonOutputFile = outputFile.replace(".svg", ".json");
+  writeFileSync(jsonOutputFile, JSON.stringify(metadata, null, 2));
 }
 
 export function gpxToSvg(
