@@ -3,10 +3,17 @@ import { MapContainer, SVGOverlay, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
 
+// const tileLayer = {
+//   url: "https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png",
+//   attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>',
+//   maxZoom: 20,
+// };
+
 const tileLayer = {
-  url: "https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png",
-  attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>',
-  maxZoom: 20,
+  url: "https://tile.tracestrack.com/topo__/{z}/{x}/{y}.png",
+  attribution:
+    '© <a href="https://tracestrack.com">TracesTrack</a> contributors, © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 18,
 };
 
 const zoom = 11;

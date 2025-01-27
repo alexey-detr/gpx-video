@@ -132,7 +132,7 @@ function createSvgAnimation(
     `M ${scaledPoints[0][0]} ${scaledPoints[0][1]}`,
     ...scaledPoints.slice(1).map((p) => `L ${p[0]} ${p[1]}`),
   ].join(" ");
-  svgContent += `<path d="${pathData}" fill="none" stroke="red" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">\n`;
+  svgContent += `<path d="${pathData}" fill="none" stroke="#6A0DAD" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">\n`;
 
   // Calculate real path length
   const realPathLength = calculatePathLength(scaledPoints);
