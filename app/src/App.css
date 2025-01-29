@@ -1,3 +1,18 @@
 .overlay {
   overflow: visible;
 }
+
+.distance-counter {
+  z-index: 1000;
+  position: fixed;
+  top: 40px;
+  right: 40px;
+  padding: 20px;
+  font-size: 50px;
+  font-family: "PT Mono", monospace;
+  font-weight: bold;
+  min-width: 8ch;
+  text-align: end;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+}

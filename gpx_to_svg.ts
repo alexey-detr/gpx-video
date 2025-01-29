@@ -59,21 +59,33 @@ function parseGpx(filePath: string): GPXPoint[] {
   return smoothPath(result, 0.0001);
 }
 
-const easingInjection = `
-      keyTimes="0;1" 
-      keySplines="0.42 0 0.58 1" 
-      calcMode="spline"
-`;
+/**
+ * Calculate the total distance of the path in kilometers.
+ */
+function calculateTotalDistance(points: GPXPoint[]): number {
+  let totalDistance = 0;
+  for (let i = 1; i < points.length; i++) {
+    const [lon1, lat1] = points[i - 1];
+    const [lon2, lat2] = points[i];
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    totalDistance += R * c;
+  }
+  return totalDistance;
+}
 
 /**
  * Create an SVG animation from a list of points.
  */
-function createSvgAnimation(
-  points: GPXPoint[],
-  outputFile: string,
-  duration: number,
-  easing = false
-): void {
+function createSvgAnimation(points: GPXPoint[], outputFile: string): void {
   // Define canvas size and scale
   const lons = points.map((p) => p[0]);
   const lats = points.map((p) => p[1]);
@@ -101,7 +113,6 @@ function createSvgAnimation(
   // Calculate the area of the bounding box in square kilometers
   const widthKm = (maxLon - minLon) * lonKmPerDegree;
   const heightKm = (maxLat - minLat) * latKmPerDegree;
-  const areaKm2 = widthKm * heightKm;
 
   // Maintain real-world aspect ratio
   const aspectRatio = widthKm / heightKm;
@@ -132,20 +143,11 @@ function createSvgAnimation(
     `M ${scaledPoints[0][0]} ${scaledPoints[0][1]}`,
     ...scaledPoints.slice(1).map((p) => `L ${p[0]} ${p[1]}`),
   ].join(" ");
-  svgContent += `<path d="${pathData}" fill="none" stroke="#6A0DAD" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">\n`;
+  svgContent += `<path d="${pathData}" fill="none" stroke-linecap="round" stroke-linejoin="round">\n`;
 
   // Calculate real path length
   const realPathLength = calculatePathLength(scaledPoints);
 
-  // Add animation with easing
-  svgContent += `
-    <animate
-      attributeName="stroke-dasharray"
-      from="0 ${realPathLength}"
-      to="${realPathLength} ${realPathLength}"
-      dur="${duration}s"
-      repeatCount="indefinite" ${easing ? easingInjection : ""} />
-  `;
   svgContent += `</path>\n`;
 
   svgContent += `</svg>`;
@@ -153,6 +155,9 @@ function createSvgAnimation(
   // Save SVG
   fs.writeFileSync(outputFile, svgContent);
   console.log(`SVG animation saved to ${outputFile}`);
+
+  // Calculate total distance
+  const totalDistance = calculateTotalDistance(points);
 
   // Generate metadata JSON
   const metadata = {
@@ -164,6 +169,8 @@ function createSvgAnimation(
       lat: centerLat,
       lon: centerLon,
     },
+    totalDistance,
+    realPathLength,
   };
 
   // Write metadata to JSON file
@@ -171,13 +178,8 @@ function createSvgAnimation(
   writeFileSync(jsonOutputFile, JSON.stringify(metadata, null, 2));
 }
 
-export function gpxToSvg(
-  gpxFile: string,
-  svgFile: string,
-  duration: number,
-  easing = false
-) {
+export function gpxToSvg(gpxFile: string, svgFile: string) {
   // Parse GPX and create animation
   const gpxPoints = parseGpx(gpxFile);
-  createSvgAnimation(gpxPoints, svgFile, duration, easing);
+  createSvgAnimation(gpxPoints, svgFile);
 }

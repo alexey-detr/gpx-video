@@ -8,13 +8,12 @@ const gpxFile = "data/Sandsjöbacka_Trail_90.gpx";
 // const gpxFile = "Stockholm-Gothenburg.gpx";
 const svgFile = "data/" + parse(gpxFile).name + ".svg";
 const jsonFile = "data/" + parse(gpxFile).name + ".json";
-const mp4File = "data/" + parse(gpxFile).name + ".mp4";
-const duration = 30;
+// const mp4File = "data/" + parse(gpxFile).name + ".mp4";
 
-gpxToSvg(gpxFile, svgFile, duration);
+gpxToSvg(gpxFile, svgFile);
 
 copyFileSync(svgFile, "app/public/route.svg");
 copyFileSync(jsonFile, "app/public/route.meta.json");
 
-await renderSvgAnimation(duration);
-await combineFrames(mp4File);
+// await renderSvgAnimation(duration);
+// await combineFrames(mp4File);
