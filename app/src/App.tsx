@@ -41,7 +41,7 @@ const tileLayers = {
   },
 
   tracesTrack: {
-    url: "https://tile.tracestrack.com/topo__/{z}/{x}/{y}.png",
+    url: `https://tile.tracestrack.com/topo__/{z}/{x}/{y}.png?key=${process.env.TRACESTRACK_API_KEY}`,
     attribution:
       '© <a href="https://tracestrack.com">TracesTrack</a> contributors, © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 18,
