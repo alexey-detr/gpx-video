@@ -15,8 +15,8 @@
   "dependencies": {
     "@svgdotjs/svg.js": "^3.2.4",
     "@types/yargs": "^17.0.33",
-    "fast-xml-parser": "^4.5.1",
-    "puppeteer": "^24.1.1",
+    "fast-xml-parser": "^4.5.3",
+    "puppeteer": "^24.3.0",
     "yargs": "^17.7.2"
   }
 }
