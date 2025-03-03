@@ -128,7 +128,6 @@ const extractSVGData = (svgText: string): SVGData => {
   };
 };
 
-// Lazy initialization of toolbar settings
 const getSavedToolbarSettings = () => {
   try {
     const saved = localStorage.getItem("toolbarSettings");
@@ -170,7 +169,6 @@ const App = () => {
     setTimeout(() => setStarted(true), 2000);
   }, []);
 
-  // Persist settings whenever they change
   useEffect(() => {
     const settings = { tileLayerKey, duration, strokeWidth, showDistance };
     localStorage.setItem("toolbarSettings", JSON.stringify(settings));
@@ -235,28 +233,35 @@ const App = () => {
     <>
       <div className="top-bar-container">
         <div className="top-bar">
-          <select
-            value={tileLayerKey}
-            onChange={(e) => setTileLayerKey(e.target.value)}
-          >
-            {Object.entries(tileLayers).map(([key, provider]) => (
-              <option key={key} value={key}>
-                {provider.label}
-              </option>
-            ))}
-          </select>
-          <input
-            type="number"
-            value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
-            placeholder="Duration (seconds)"
-          />
-          <input
-            type="number"
-            value={strokeWidth}
-            onChange={(e) => setStrokeWidth(Number(e.target.value))}
-            placeholder="Stroke Width"
-          />
+          <label>
+            Tile Layer:
+            <select
+              value={tileLayerKey}
+              onChange={(e) => setTileLayerKey(e.target.value)}
+            >
+              {Object.entries(tileLayers).map(([key, provider]) => (
+                <option key={key} value={key}>
+                  {provider.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Duration:
+            <input
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
+            />
+          </label>
+          <label>
+            Stroke Width:
+            <input
+              type="number"
+              value={strokeWidth}
+              onChange={(e) => setStrokeWidth(Number(e.target.value))}
+            />
+          </label>
           <label>
             <input
               type="checkbox"
