@@ -7,15 +7,15 @@
     "web": "cd app && bun run dev"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "^1.2.4"
   },
   "peerDependencies": {
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "dependencies": {
     "@svgdotjs/svg.js": "^3.2.4",
     "@types/yargs": "^17.0.33",
-    "fast-xml-parser": "^4.5.3",
+    "fast-xml-parser": "^5.0.8",
     "puppeteer": "^24.3.0",
     "yargs": "^17.7.2"
   }
